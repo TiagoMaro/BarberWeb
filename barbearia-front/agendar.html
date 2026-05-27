@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendar - Fauget Barber</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/agendar.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Cinzel:wght@700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="./css/agendar.css">
-    
 </head>
+
 <body>
 
     <header class="navbar">
@@ -24,7 +27,7 @@
     </header>
 
     <main class="booking-container">
-        
+
         <div class="top-sections">
             <section class="section-box">
                 <div class="section-title-bar">Funcionários</div>
@@ -47,7 +50,7 @@
 
         <div class="agenda-section">
             <div class="section-title-bar" style="background-color: #433831;">Agenda</div>
-            
+
             <div class="agenda-grid">
                 <div class="agenda-box">
                     <div class="calendar-header">
@@ -56,10 +59,16 @@
                         <button id="next-month"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-days">
-                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        <div>Dom</div>
+                        <div>Seg</div>
+                        <div>Ter</div>
+                        <div>Qua</div>
+                        <div>Qui</div>
+                        <div>Sex</div>
+                        <div>Sáb</div>
                     </div>
                     <div class="calendar-dates" id="calendar-dates">
-                        </div>
+                    </div>
                 </div>
 
                 <div class="agenda-box">
@@ -100,9 +109,12 @@
             <div class="info-block">
                 <p><strong>Redes sociais.</strong></p>
                 <div class="social-icons">
-                    <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="https://wa.me/seunumeroaqui" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-                    <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://instagram.com" target="_blank" title="Instagram"><i
+                            class="fa-brands fa-instagram"></i></a>
+                    <a href="https://wa.me/seunumeroaqui" target="_blank" title="WhatsApp"><i
+                            class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://facebook.com" target="_blank" title="Facebook"><i
+                            class="fa-brands fa-facebook-f"></i></a>
                 </div>
                 <p><strong>Localização.</strong></p>
                 <p>R. Konrad Adenauer, 442 - Tarumã, Curitiba - PR, 82820-540</p>
@@ -147,7 +159,7 @@
 
         // --- GERADOR DE CALENDÁRIO SIMPLES (Maio de 2026 como base) ---
         const calendarDatesContainer = document.getElementById('calendar-dates');
-        const totalDays = 31; 
+        const totalDays = 31;
         const startDayOfWeek = 5; // Maio de 2026 começa em uma sexta-feira
 
         // Renderizar dias vazios até o começo do mês
@@ -165,7 +177,7 @@
                 const selected = calendarDatesContainer.querySelector('.selected-date');
                 if (selected) selected.classList.remove('selected-date');
                 dayDiv.classList.add('selected-date');
-                
+
                 bookingData.data = `${day}/05/2026`;
                 updateSummary();
             });
@@ -196,4 +208,5 @@
         });
     </script>
 </body>
+
 </html>
