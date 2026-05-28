@@ -1,8 +1,8 @@
 node_modules
 ./barbearia-api/node_modules
 
-dotenv
-./barbearia-api/dotenv
+.env
+./barbearia-api/.env
 
 .DS_Store
 
