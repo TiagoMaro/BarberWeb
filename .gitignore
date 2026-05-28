@@ -1,10 +1,10 @@
 node_modules
-barbearia-api/node_modules
+./barbearia-api/node_modules
 
 .env
-barbearia/.env
+./barbearia-api/.env
 
 .DS_Store
 
 npm-debug.log
-barbearia/npm-debug.log
+./barbearia-api/npm-debug.log
