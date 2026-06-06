@@ -10,29 +10,19 @@
    
 </head>
 <body>
-    <header class="navbar">
-        <div class="nav-group">
-            <a href="index.html" class="nav-link btn-left">HOME</a>
-            <a href="agendar.html" class="nav-link btn-right">AGENDAR</a>
-        </div>
-        <div class="logo-text">Fauget<br>Barber</div>
-        <div class="nav-group">
-            <a href="login.html" class="nav-link btn-left">ENTRAR</a>
-            <a href="registrar.html" class="nav-link btn-right">REGISTRAR</a>
-        </div>
-    </header>
+    <header id="header-componente"></header>
 
     <main class="login-wrapper">
         <div class="login-card">
             <h2>Login</h2>
-            <form>
+            <form id="formLogin">
                 <div class="form-group">
                     <label>E-mail</label>
-                    <input type="email" placeholder="seu@email.com">
+                    <input type="email" id="email" placeholder="seu@email.com">
                 </div>
                 <div class="form-group">
                     <label>Senha</label>
-                    <input type="password" placeholder="••••••••">
+                    <input type="password" id="senha" placeholder="••••••••">
                     <div style="text-align: left;">
                         <a href="#" class="forgot-password">Esqueceu sua senha?</a>
                     </div>
@@ -66,5 +56,8 @@
             </div>
         </div>
     </footer>
+    <script src="./js/api.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/components/header.js"></script>
 </body>
 </html>

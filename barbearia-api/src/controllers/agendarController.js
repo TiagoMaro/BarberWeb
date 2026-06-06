@@ -4,6 +4,36 @@ exports.criarAgendamento = async (req, res) => {
     try {
         const { data_hora, barbeiro, servico } = req.body;
         const cliente = req.userId;
+
+
+        const dataAgendamento = new Date(data_hora);
+        const agora = new Date();
+
+        // 1. A MÁQUINA DO TEMPO: Bloqueia datas no passado
+        if (dataAgendamento < agora) {
+            return res.status(400).json({ 
+                message: "Não é possível agendar em uma data ou horário que já passou." 
+            });
+        }
+
+        // 2. HORÁRIO DE EXPEDIENTE: Verifica os dias de funcionamento
+        const diaDaSemana = dataAgendamento.getDay(); // 0 = Domingo, 1 = Segunda... 6 = Sábado
+        const horaAgendamento = dataAgendamento.getHours();
+
+        // Bloqueia domingos (dia 0)
+        if (diaDaSemana === 0) {
+            return res.status(400).json({ 
+                message: "A barbearia não funciona aos domingos." 
+            });
+        }
+        
+        // Bloqueia horários fora do expediente (8h às 18h)
+        if (horaAgendamento < 8 || horaAgendamento >= 18) {
+            return res.status(400).json({ 
+                message: "A barbearia só funciona das 8h às 18h." 
+            });
+        }
+
         if (!data_hora || !barbeiro || !servico) {
             return res.status(400).json({ message: "Todos os campos são obrigatórios." });
         }
@@ -68,11 +98,6 @@ exports.listarTodos = async (req, res) => {
         const userId = req.userId;       // ID vindo do Token JWT
         const userCargo = req.userCargo;   // 'cliente' ou 'barbeiro' vindo do Token JWT
 
-
-        console.log("====== DEBUG APP ======");
-        console.log("ID DO TOKEN:", userId);
-        console.log("TIPO DO TOKEN:", userCargo);
-        console.log("=======================");
         // Criamos um objeto de filtro vazio
         let filtro = {};
 
@@ -83,15 +108,38 @@ exports.listarTodos = async (req, res) => {
             filtro.barbeiro = userId;
         } else if (userCargo === 'gerente') {
             filtro = {};
+        } else {
+            return res.status(403).json({ message: "Acesso negado. Seu cargo não tem permissão para esta listagem." });
         }
 
-        // Busca no banco aplicando o filtro dinâmico
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        
+        // A matemática do pulo: na página 1, pula 0. Na página 2 (limite 10), pula os 10 primeiros.
+        const skip = (page - 1) * limit;
+
+        // Busca os agendamentos fatiados
         const agendamentos = await Agendamento.find(filtro)
             .populate('barbeiro', 'nomeCompleto email')
             .populate('cliente', 'nomeCompleto email')
-            .sort({ data_hora: 1 }); // Ordena por ordem cronológica (mais próximos primeiro)
-        
-        return res.status(200).json(agendamentos);
+            .sort({ data_hora: 1 })
+            .skip(skip)    // Pula os registros das páginas anteriores
+            .limit(limit); // Limita a quantidade desta página
+
+        // Conta quantos documentos totais existem no banco com aquele filtro
+        const totalRegistros = await Agendamento.countDocuments(filtro);
+
+        // Retorna um objeto mais rico para o frontend
+        return res.status(200).json({
+            info: {
+                totalRegistros,
+                paginasTotais: Math.ceil(totalRegistros / limit),
+                paginaAtual: page,
+                itensNestaPagina: agendamentos.length
+            },
+            dados: agendamentos
+        });
+
     } catch (error) {
         return res.status(500).json({ message: "Erro ao buscar agendamentos.", erro: error.message });
     }
