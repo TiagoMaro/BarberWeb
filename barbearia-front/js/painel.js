@@ -16,19 +16,29 @@ async function iniciarPainel() {
 
         // Expulsa intrusos que tentarem digitar painel.html na URL
         if (usuarioLogado.cargo !== 'gerente') {
-            alert("Acesso Negado. Esta página é restrita a gerentes.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Acesso Negado',
+                text: 'Esta página é restrita a gerentes.',
+                confirmButtonColor: '#433831'
+            });
             window.location.href = 'index.html';
             return;
         }
 
         // Se for gerente, carrega a lista de todos os usuários
         carregarUsuarios();
-        carregarServicos(); 
+        carregarServicos();
         carregarEstatisticasDashboard()
 
     } catch (erro) {
         console.error("Erro ao validar acesso:", erro);
-        alert("Erro de conexão com o servidor.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Erro de conexão com o servidor.',
+            confirmButtonColor: '#433831'
+        });
         window.location.href = 'index.html';
     }
 }
@@ -36,15 +46,15 @@ async function iniciarPainel() {
 // 2. BUSCAR TODOS OS USUÁRIOS NO BANCO
 async function carregarUsuarios() {
     const tbody = document.getElementById('tabelaUsuarios');
-    
+
     try {
         // Sem filtro de cargo, a nossa API deve retornar todo mundo
         const resposta = await fetch(`${API_BASE_URL}/user`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         const respostaJson = await resposta.json();
-        
+
         // Trava de segurança para caso a API retorne { dados: [...] } ou direto o array [...]
         const usuarios = respostaJson.dados || respostaJson;
 
@@ -57,7 +67,7 @@ async function carregarUsuarios() {
 
         usuarios.forEach(user => {
             const tr = document.createElement('tr');
-            
+
             // Define quais opções estarão selecionadas no menu suspenso
             const selCliente = user.cargo === 'cliente' ? 'selected' : '';
             const selBarbeiro = user.cargo === 'barbeiro' ? 'selected' : '';
@@ -93,8 +103,18 @@ async function atualizarCargo(userId) {
     // Pega o valor que o gerente selecionou naquele momento
     const novoCargo = document.getElementById(`selectCargo_${userId}`).value;
 
-    const confirmar = confirm(`Tem certeza que deseja alterar o cargo deste usuário para ${novoCargo.toUpperCase()}?`);
-    if (!confirmar) return;
+    const confirmacao = await Swal.fire({
+        title: 'Confirmar Promoção',
+        text: `Tem certeza que deseja alterar o cargo deste usuário para ${novoCargo.toUpperCase()}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745', 
+        cancelButtonColor: '#dc3545',  
+        confirmButtonText: 'Sim, alterar!',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacao.isConfirmed) return;
 
     try {
         // Dispara para aquela rota PATCH que criamos anteriormente
@@ -110,16 +130,31 @@ async function atualizarCargo(userId) {
         const dados = await resposta.json();
 
         if (resposta.ok) {
-            alert(dados.message || "Cargo atualizado com sucesso!");
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: dados.message || "Cargo atualizado com sucesso!",
+                confirmButtonColor: '#433831'
+            });
             // Não precisa dar reload na página inteira, a alteração visual já está feita, 
             // mas podemos chamar carregarUsuarios() novamente se preferir.
         } else {
-            alert(dados.message || "Erro ao atualizar cargo.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: dados.message || "Erro ao atualizar cargo.",
+                confirmButtonColor: '#433831'
+            });
         }
 
     } catch (erro) {
         console.error("Erro ao atualizar cargo:", erro);
-        alert("Erro de conexão com o servidor.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Erro de conexão com o servidor.',
+            confirmButtonColor: '#433831'
+        });
     }
 }
 
@@ -131,16 +166,16 @@ async function atualizarCargo(userId) {
 async function carregarServicos() {
     const tbody = document.getElementById('tabelaServicos');
     if (!tbody) return;
-    
+
     try {
         const resposta = await fetch(`${API_BASE_URL}/servicos`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         const respostaJson = await resposta.json();
         const servicos = respostaJson.dados || respostaJson;
 
-        tbody.innerHTML = ''; 
+        tbody.innerHTML = '';
 
         if (!servicos || servicos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhum serviço cadastrado.</td></tr>';
@@ -149,9 +184,9 @@ async function carregarServicos() {
 
         servicos.forEach(servico => {
             const tr = document.createElement('tr');
-            
+
             const preco = servico.preco ? `R$ ${servico.preco.toFixed(2)}` : 'R$ 0,00';
-            
+
             // CORREÇÃO AQUI: Mudou de servico.duracao para servico.duracao_minutos
             const duracao = servico.duracao_minutos ? `${servico.duracao_minutos} min` : '--';
 
@@ -186,7 +221,7 @@ if (formNovoServico) {
 
         const nome = document.getElementById('nomeServico').value.trim();
         const preco = parseFloat(document.getElementById('precoServico').value);
-        
+
         // CORREÇÃO AQUI: Captura o valor na variável que o backend espera
         const duracao_minutos = parseInt(document.getElementById('duracaoServico').value);
         const descricao = "Sem descrição"; // Enviando um texto padrão para satisfazer o req.body
@@ -205,44 +240,85 @@ if (formNovoServico) {
             const dados = await resposta.json();
 
             if (resposta.status === 201 || resposta.ok) {
-                alert("Serviço cadastrado com sucesso!");
-                formNovoServico.reset(); 
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Serviço cadastrado com sucesso!',
+                    confirmButtonColor: '#433831'
+                });
+                formNovoServico.reset();
                 carregarServicos(); // Atualiza a tabela imediatamente
             } else {
-                alert(dados.message || "Erro ao cadastrar serviço.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: dados.message || 'Erro ao cadastrar serviço.',
+                    confirmButtonColor: '#433831'
+                });
             }
         } catch (erro) {
             console.error("Erro ao salvar serviço:", erro);
-            alert("Erro de conexão com o servidor.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: 'Erro de conexão com o servidor.',
+                confirmButtonColor: '#433831'
+            });
         }
     });
 }
 
 // 3. Excluir um serviço
 async function deletarServico(id) {
-    const confirmar = confirm("Tem certeza que deseja desativar este serviço?");
-    if (!confirmar) return;
+    // Substituindo o "confirm()" antigo
+    const confirmacao = await Swal.fire({
+        title: 'Tem certeza?',
+        text: "Deseja desativar este serviço?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545', // Vermelho para a ação perigosa
+        cancelButtonColor: '#433831', // Marrom da barbearia para o botão cancelar
+        confirmButtonText: 'Sim, desativar!',
+        cancelButtonText: 'Cancelar'
+    });
+
+    // Se o usuário clicar em "Cancelar" ou clicar fora da caixa, encerramos aqui
+    if (!confirmacao.isConfirmed) return;
 
     try {
-        // Ajustado para a sua nova rota PATCH de inativação
         const resposta = await fetch(`${API_BASE_URL}/servicos/${id}/inativar`, {
             method: 'PATCH',
-            headers: { 
+            headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
 
         if (resposta.ok) {
-            alert("Serviço desativado com sucesso!");
-            carregarServicos(); // Recarrega a tabela
+            Swal.fire({
+                icon: 'success',
+                title: 'Desativado!',
+                text: 'O serviço foi desativado com sucesso.',
+                confirmButtonColor: '#433831'
+            });
+            carregarServicos();
         } else {
             const dados = await resposta.json();
-            alert(dados.message || "Erro ao desativar serviço.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: dados.message || "Erro ao desativar serviço.",
+                confirmButtonColor: '#433831'
+            });
         }
     } catch (erro) {
         console.error("Erro ao deletar serviço:", erro);
-        alert("Erro de conexão com o servidor.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro de Conexão',
+            text: 'Não foi possível conectar ao servidor.',
+            confirmButtonColor: '#433831'
+        });
     }
 }
 
@@ -259,7 +335,7 @@ async function carregarEstatisticasDashboard() {
         // Injeta os valores capturados diretamente nos elementos HTML correspondentes
         document.getElementById('statAgendamentos').innerText = dados.totalAgendamentos || 0;
         document.getElementById('statClientes').innerText = dados.totalClientes || 0;
-        
+
         // Formata o faturamento como moeda brasileira (R$)
         if (dados.faturamentoHoje !== undefined) {
             document.getElementById('statFaturamento').innerText = dados.faturamentoHoje.toLocaleString('pt-BR', {
@@ -278,7 +354,7 @@ function abrirModalEdicao(id, nome, preco, duracao) {
     document.getElementById('editNomeServico').value = nome;
     document.getElementById('editPrecoServico').value = preco;
     document.getElementById('editDuracaoServico').value = duracao;
-    
+
     // Altera o display de 'none' para 'flex' para mostrar a janela
     document.getElementById('modalEditarServico').style.display = 'flex';
 }
@@ -312,16 +388,31 @@ if (formEditarServico) {
             });
 
             if (resposta.ok) {
-                alert("Serviço atualizado com sucesso!");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Serviço atualizado com sucesso!',
+                    confirmButtonColor: '#433831'
+                });
                 fecharModalEdicao(); // Esconde a janelinha
                 carregarServicos(); // Atualiza a tabela com o novo preço/nome
             } else {
                 const dados = await resposta.json();
-                alert(dados.message || "Erro ao atualizar serviço.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ops...',
+                    text: dados.message || 'Erro ao atualizar serviço.',
+                    confirmButtonColor: '#433831'
+                });
             }
         } catch (erro) {
             console.error("Erro ao atualizar serviço:", erro);
-            alert("Erro de conexão com o servidor.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: 'Erro de conexão com o servidor.',
+                confirmButtonColor: '#433831'
+            });
         }
     });
 }

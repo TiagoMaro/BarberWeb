@@ -29,7 +29,12 @@ async function carregarDadosPerfil() {
 
     } catch (erro) {
         console.error(erro);
-        alert("Erro ao carregar os dados do seu perfil.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Ops...',
+            text: 'Erro ao carregar os dados do seu perfil.',
+            confirmButtonColor: '#433831'
+        });
     }
 }
 
@@ -46,7 +51,12 @@ if (formPerfil) {
 
         // Validação básica de senha se o usuário digitou algo
         if (novaSenha && novaSenha !== confirmarNovaSenha) {
-            alert("As novas senhas não coincidem!");
+            Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: 'As novas senhas não coincidem!',
+                confirmButtonColor: '#433831'
+            });
             return;
         }
 
@@ -76,17 +86,32 @@ if (formPerfil) {
             const dados = await resposta.json();
 
             if (resposta.ok) {
-                alert("Perfil atualizado com sucesso!");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Perfil atualizado com sucesso!',
+                    confirmButtonColor: '#433831'
+                });
                 window.location.reload(); // Recarrega para limpar os campos de senha
             } else {
-                alert(dados.message || "Erro ao atualizar dados.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ops...',
+                    text: dados.message || 'Erro ao atualizar dados.',
+                    confirmButtonColor: '#433831'
+                });
                 btn.innerText = "Salvar Alterações";
                 btn.disabled = false;
             }
 
         } catch (erro) {
             console.error(erro);
-            alert("Erro de conexão com o servidor.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: 'Erro de conexão com o servidor.',
+                confirmButtonColor: '#433831'
+            });
             const btn = document.getElementById('btnSalvarPerfil');
             btn.innerText = "Salvar Alterações";
             btn.disabled = false;

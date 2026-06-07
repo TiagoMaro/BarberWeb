@@ -28,11 +28,21 @@ document.getElementById('formLogin').addEventListener('submit', async function (
             window.location.href = 'index.html';
         } else {
             // Se a senha estiver errada, mostra o erro da API
-            alert(dados.message || 'Erro ao realizar login.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: dados.message || 'Erro ao realizar login.',
+                confirmButtonColor: '#433831'
+            });
         }
 
     } catch (erro) {
         console.error('Erro na requisição:', erro);
-        alert('Erro ao conectar com o servidor. Verifique se a API está rodando.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Erro ao conectar com o servidor. Verifique se a API está rodando.',
+            confirmButtonColor: '#433831'
+        });
     }
 });

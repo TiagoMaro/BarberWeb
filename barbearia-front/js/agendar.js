@@ -197,7 +197,12 @@ function updateSummary() {
 // ==========================================
 document.getElementById('btn-submit-booking').addEventListener('click', async () => {
     if (!bookingData.funcionario || !bookingData.servico || !bookingData.data || !bookingData.horario) {
-        alert('Por favor, selecione todas as opções antes de confirmar!');
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Por favor, selecione todas as opções antes de confirmar!',
+            confirmButtonColor: '#433831'
+        });
         return;
     }
 
@@ -231,17 +236,32 @@ document.getElementById('btn-submit-booking').addEventListener('click', async ()
         const dados = await resposta.json();
 
         if (resposta.status === 201) {
-            alert('Agendamento realizado com sucesso!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Agendamento realizado com sucesso!',
+                confirmButtonColor: '#433831'
+            });
             window.location.reload(); 
         } else {
-            alert(dados.message || 'Erro ao agendar horário.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: dados.message || 'Erro ao agendar horário.',
+                confirmButtonColor: '#433831'
+            });
             btn.innerText = "Confirmar";
             btn.disabled = false;
         }
 
     } catch (erro) {
         console.error('Erro na requisição:', erro);
-        alert('Erro ao conectar com o servidor.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Erro ao conectar com o servidor.',
+            confirmButtonColor: '#433831'
+        });
         const btn = document.getElementById('btn-submit-booking');
         btn.innerText = "Confirmar";
         btn.disabled = false;

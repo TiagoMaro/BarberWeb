@@ -21,7 +21,7 @@ exports.login = async (req, res) => {
         }
 
         // 1. Busca o usuário no banco de dados pelo e-mail
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
 
         if (!user) {
             return res.status(404).json({ message: "Usuário não encontrado." });
@@ -72,7 +72,7 @@ exports.atualizarPerfil = async (req, res) => {
 
         // 2. Atualiza apenas os campos que o frontend enviou
         if (nomeCompleto) usuario.nomeCompleto = nomeCompleto;
-        if (email) usuario.email = email;
+        if (email) usuario.email = email.toLowerCase().trim();
         
         // 3. A MÁGICA DA SENHA: 
         if (senhaHash) {

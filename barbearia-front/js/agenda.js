@@ -140,8 +140,17 @@ async function configurarPainelGerente() {
 
 async function cancelarAgendamento(idAgendamento) {
     // Confirmação de segurança para evitar cliques acidentais
-    const confirmar = confirm("Tem certeza que deseja cancelar este horário?");
-    if (!confirmar) return;
+    const confirmacao = await Swal.fire({
+        title: 'Tem certeza?',
+        text: "Deseja cancelar este horário?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545', // Vermelho para a ação de cancelar/excluir
+        cancelButtonColor: '#433831',  // Marrom padrão da barbearia
+        confirmButtonText: 'Sim, cancelar!',
+        cancelButtonText: 'Não, voltar'
+    });
+    if (!confirmacao.isConfirmed) return;
 
     try {
         const resposta = await fetch(`${API_BASE_URL}/agendamentos/${idAgendamento}/cancelar`, {
@@ -155,13 +164,28 @@ async function cancelarAgendamento(idAgendamento) {
         const dados = await resposta.json();
 
         if (resposta.ok) {
-            alert("Agendamento cancelado com sucesso!");
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Agendamento cancelado com sucesso!',
+                confirmButtonColor: '#433831'
+            });
             window.location.reload(); // Recarrega a tela para atualizar a cor do status
         } else {
-            alert(dados.message || "Erro ao cancelar.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: dados.message || 'Erro ao cancelar. Tente novamente.',
+                confirmButtonColor: '#433831'
+            });
         }
     } catch (erro) {
         console.error("Erro ao cancelar:", erro);
-        alert("Erro de conexão com o servidor.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            text: 'Erro de conexão com o servidor.',
+            confirmButtonColor: '#433831'
+        });
     }
 }

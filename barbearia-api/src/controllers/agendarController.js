@@ -249,11 +249,9 @@ exports.obterEstatisticasDashboard = async (req, res) => {
 
         // Define o início e o fim do dia de hoje em UTC
         const inicioHoje = new Date();
-        inicioHoje.setDate(inicioHoje.getDate() + 1);
         inicioHoje.setUTCHours(0, 0, 0, 0);
         
         const fimHoje = new Date();
-        fimHoje.setDate(fimHoje.getDate() + 1);
         fimHoje.setUTCHours(23, 59, 59, 999);
 
         // 1. Busca os agendamentos de hoje que NÃO estão cancelados
@@ -268,8 +266,6 @@ exports.obterEstatisticasDashboard = async (req, res) => {
         let faturamentoHoje = 0;
         
         agendamentosHoje.forEach(ag => {
-            // RASTREADOR: Vamos ver o que o Mongoose realmente trouxe
-            console.log("🔍 Inspecionando ag.servico:", ag.servico);
 
             if (ag.servico && ag.servico.preco) {
                 // Força a conversão para número, evitando o bug de concatenação de texto
@@ -277,8 +273,6 @@ exports.obterEstatisticasDashboard = async (req, res) => {
             }
         });
         
-        console.log("💰 Faturamento Total Calculado:", faturamentoHoje);
-
         // 3. Conta o total de usuários cadastrados com o cargo de cliente
         const totalClientes = await User.countDocuments({ cargo: 'cliente' });
 
