@@ -1,27 +1,130 @@
-// Objeto para guardar as escolhas do usuário
-const bookingData = {
-    funcionario: '',
-    servico: '',
-    data: '',
-    horario: ''
+// js/agendar.js
+
+const token = localStorage.getItem('token');
+if (!token) {
+    window.location.href = 'login.html';
+}
+
+// Objeto central que armazena as escolhas do cliente
+const bookingData = { 
+    funcionario: '', 
+    servico: '', 
+    data: '', 
+    horario: '' 
 };
 
-// --- SELEÇÃO DE FUNCIONÁRIO E SERVIÇO ---
-function setupSelectableGroup(containerId, dataKey) {
-    const items = document.querySelectorAll(`#${containerId} .selectable-item`);
-    items.forEach(item => {
-        item.addEventListener('click', () => {
-            items.forEach(i => i.classList.remove('selected'));
-            item.classList.add('selected');
-            bookingData[dataKey] = item.getAttribute('data-value');
-            updateSummary();
+// ==========================================
+// 1. COMPONENTE DE SERVIÇOS (DINÂMICO)
+// ==========================================
+async function renderizarServicos() {
+    const container = document.getElementById('servicos-list');
+    try {
+        const resposta = await fetch(`${API_BASE_URL}/servicos`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    });
-}
-setupSelectableGroup('funcionarios-list', 'funcionario');
-setupSelectableGroup('servicos-list', 'servico');
+        const servicos = await resposta.json();
+        container.innerHTML = ''; 
 
-// --- SELEÇÃO DE HORÁRIOS ---
+        servicos.forEach(servico => {
+            const div = document.createElement('div');
+            div.className = 'selectable-item';
+            div.textContent = servico.nome; 
+            div.setAttribute('data-value', servico._id); 
+
+            div.addEventListener('click', () => {
+                document.querySelectorAll('#servicos-list .selectable-item').forEach(i => i.classList.remove('selected'));
+                div.classList.add('selected');
+                bookingData.servico = servico._id;
+                updateSummary();
+            });
+            container.appendChild(div);
+        });
+    } catch (erro) {
+        container.innerHTML = '<p>Erro ao carregar serviços.</p>';
+    }
+}
+
+// ==========================================
+// 2. COMPONENTE DE FUNCIONÁRIOS (DINÂMICO)
+// ==========================================
+async function renderizarBarbeiros() {
+    const container = document.getElementById('funcionarios-list');
+    try {
+        const resposta = await fetch(`${API_BASE_URL}/user?cargo=barbeiro`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const barbeiros = await resposta.json();
+        container.innerHTML = ''; 
+
+        barbeiros.forEach(barbeiro => {
+            const div = document.createElement('div');
+            div.className = 'selectable-item';
+            div.textContent = barbeiro.nomeCompleto; 
+            div.setAttribute('data-value', barbeiro._id); 
+
+            div.addEventListener('click', () => {
+                document.querySelectorAll('#funcionarios-list .selectable-item').forEach(i => i.classList.remove('selected'));
+                div.classList.add('selected');
+                bookingData.funcionario = barbeiro._id;
+                updateSummary();
+            });
+            container.appendChild(div);
+        });
+    } catch (erro) {
+        container.innerHTML = '<p>Erro ao carregar barbeiros.</p>';
+    }
+}
+
+// ==========================================
+// 3. CALENDÁRIO INTELIGENTE (DINÂMICO)
+// ==========================================
+function renderizarCalendario() {
+    const container = document.getElementById('calendar-dates');
+    const headerMesAno = document.getElementById('calendar-month-year');
+    container.innerHTML = '';
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth(); 
+    const anoAtual = hoje.getFullYear();
+
+    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    headerMesAno.textContent = `${nomesMeses[mesAtual]} ${anoAtual}`;
+
+    const primeiroDiaDaSemana = new Date(anoAtual, mesAtual, 1).getDay();
+    const diasNoMes = new Date(anoAtual, mesAtual + 1, 0).getDate();
+
+    for (let i = 0; i < primeiroDiaDaSemana; i++) {
+        const divEmpty = document.createElement('div');
+        divEmpty.className = 'empty';
+        container.appendChild(divEmpty);
+    }
+
+    for (let day = 1; day <= diasNoMes; day++) {
+        const divDay = document.createElement('div');
+        divDay.textContent = day;
+        
+        if (day < hoje.getDate()) {
+            divDay.style.opacity = '0.3';
+            divDay.style.cursor = 'not-allowed';
+        } else {
+            divDay.addEventListener('click', () => {
+                const selected = container.querySelector('.selected-date');
+                if (selected) selected.classList.remove('selected-date');
+                divDay.classList.add('selected-date');
+                
+                const diaFormatado = String(day).padStart(2, '0');
+                const mesFormatado = String(mesAtual + 1).padStart(2, '0');
+                bookingData.data = `${diaFormatado}/${mesFormatado}/${anoAtual}`;
+                updateSummary();
+            });
+        }
+        container.appendChild(divDay);
+    }
+}
+
+// ==========================================
+// 4. SELEÇÃO DE HORÁRIOS (MANTIDA!)
+// ==========================================
 const hourItems = document.querySelectorAll('.hour-item');
 hourItems.forEach(hour => {
     hour.addEventListener('click', () => {
@@ -32,52 +135,78 @@ hourItems.forEach(hour => {
     });
 });
 
-// --- GERADOR DE CALENDÁRIO SIMPLES (Maio de 2026 como base) ---
-const calendarDatesContainer = document.getElementById('calendar-dates');
-const totalDays = 31;
-const startDayOfWeek = 5; // Maio de 2026 começa em uma sexta-feira
-
-// Renderizar dias vazios até o começo do mês
-for (let i = 0; i < startDayOfWeek; i++) {
-    const emptyDiv = document.createElement('div');
-    emptyDiv.classList.add('empty');
-    calendarDatesContainer.appendChild(emptyDiv);
-}
-
-// Criar os dias clicáveis
-for (let day = 1; day <= totalDays; day++) {
-    const dayDiv = document.createElement('div');
-    dayDiv.innerText = day;
-    dayDiv.addEventListener('click', () => {
-        const selected = calendarDatesContainer.querySelector('.selected-date');
-        if (selected) selected.classList.remove('selected-date');
-        dayDiv.classList.add('selected-date');
-
-        bookingData.data = `${day}/05/2026`;
-        updateSummary();
-    });
-    calendarDatesContainer.appendChild(dayDiv);
-}
-
-// --- ATUALIZAR RESUMO (CONFIRMAÇÃO) ---
-const summaryText = document.getElementById('summary-text');
+// ==========================================
+// 5. ATUALIZAR RESUMO DA TELA
+// ==========================================
 function updateSummary() {
+    const summaryText = document.getElementById('summary-text');
     if (bookingData.funcionario || bookingData.servico || bookingData.data || bookingData.horario) {
         summaryText.innerHTML = `
-                    <p style="margin-bottom: 8px;"><strong>Profissional:</strong> <br><span>${bookingData.funcionario || 'Não selecionado'}</span></p>
-                    <p style="margin-bottom: 8px;"><strong>Serviço:</strong> <br><span>${bookingData.servico || 'Não selecionado'}</span></p>
-                    <p style="margin-bottom: 8px;"><strong>Data:</strong> <br><span>${bookingData.data || 'Não selecionada'}</span></p>
-                    <p><strong>Horário:</strong> <br><span>${bookingData.horario || 'Não selecionado'}</span></p>
-                `;
+            <p style="margin-bottom: 8px;"><strong>Profissional:</strong> <br><span>${bookingData.funcionario ? 'Selecionado ✓' : 'Não selecionado'}</span></p>
+            <p style="margin-bottom: 8px;"><strong>Serviço:</strong> <br><span>${bookingData.servico ? 'Selecionado ✓' : 'Não selecionado'}</span></p>
+            <p style="margin-bottom: 8px;"><strong>Data:</strong> <br><span>${bookingData.data || 'Não selecionada'}</span></p>
+            <p><strong>Horário:</strong> <br><span>${bookingData.horario || 'Não selecionado'}</span></p>
+        `;
     }
 }
 
-// --- BOTÃO DE CONFIRMAÇÃO ---
-document.getElementById('btn-submit-booking').addEventListener('click', () => {
+// ==========================================
+// 6. BOTÃO DE CONFIRMAÇÃO (ENVIO PARA A API)
+// ==========================================
+document.getElementById('btn-submit-booking').addEventListener('click', async () => {
     if (!bookingData.funcionario || !bookingData.servico || !bookingData.data || !bookingData.horario) {
         alert('Por favor, selecione todas as opções antes de confirmar!');
-    } else {
-        alert(`Agendamento realizado com sucesso!\n\nBarbeiro: ${bookingData.funcionario}\nServiço: ${bookingData.servico}\nData: ${bookingData.data}\nHora: ${bookingData.horario}`);
-        // Aqui você integrará o envio para o banco de dados futuramente
+        return;
+    }
+
+    const partesData = bookingData.data.split('/');
+    const dia = partesData[0];
+    const mes = partesData[1];
+    const ano = partesData[2];
+    
+    const dataHoraIso = `${ano}-${mes}-${dia}T${bookingData.horario}:00`;
+
+    const payload = {
+        data_hora: dataHoraIso,
+        barbeiro: bookingData.funcionario,
+        servico: bookingData.servico
+    };
+
+    try {
+        const btn = document.getElementById('btn-submit-booking');
+        btn.innerText = "Agendando...";
+        btn.disabled = true;
+
+        const resposta = await fetch(`${API_BASE_URL}/agendamentos/agendar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.status === 201) {
+            alert('Agendamento realizado com sucesso!');
+            window.location.reload(); 
+        } else {
+            alert(dados.message || 'Erro ao agendar horário.');
+            btn.innerText = "Confirmar";
+            btn.disabled = false;
+        }
+
+    } catch (erro) {
+        console.error('Erro na requisição:', erro);
+        alert('Erro ao conectar com o servidor.');
+        const btn = document.getElementById('btn-submit-booking');
+        btn.innerText = "Confirmar";
+        btn.disabled = false;
     }
 });
+
+// Inicializa as funções dinâmicas ao carregar a página
+renderizarServicos();
+renderizarBarbeiros();
+renderizarCalendario();

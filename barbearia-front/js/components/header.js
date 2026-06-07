@@ -12,7 +12,6 @@ function renderizarHeader() {
         </div>
     </header>
     `;
-
     // 2. Procura a tag onde o cabeçalho deve nascer e injeta o HTML nela
     const headerContainer = document.getElementById('header-componente');
     if (headerContainer) {
@@ -31,9 +30,13 @@ async function verificarEstadoLogin() {
     // Se não houver token, o usuário é apenas um visitante comum
     if (!token) {
         if (statusUsuario) {
-            statusUsuario.innerHTML = '<a href="login.html" class="link-login">Fazer Login</a>';
+            statusUsuario.innerHTML = ` 
+        <div class="nav-group">
+            <a href="login.html" class="nav-link btn-left">ENTRAR</a>
+            <a href="registrar.html" class="nav-link btn-right">REGISTRAR</a>
+        </div>`;
         }
-        return; 
+        return;
     }
 
     // Se existe um token, vamos perguntar para a API quem é o dono dele
@@ -48,7 +51,7 @@ async function verificarEstadoLogin() {
 
         if (resposta.ok) {
             const usuario = await resposta.json();
-            
+
             // MÁGICA AQUI: Exibe o nome real do banco de dados!
             if (statusUsuario) {
                 statusUsuario.textContent = `👋 Olá, ${usuario.nomeCompleto.split(' ')[0]}`;

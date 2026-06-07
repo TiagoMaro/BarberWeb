@@ -22,18 +22,14 @@
             <section class="section-box">
                 <div class="section-title-bar">Funcionários</div>
                 <div class="options-list" id="funcionarios-list">
-                    <div class="selectable-item" data-value="Nome #1">Nome #1</div>
-                    <div class="selectable-item" data-value="Nome #2">Nome #2</div>
-                    <div class="selectable-item" data-value="Nome #3">Nome #3</div>
+                    <p style="text-align:center; width:100%; font-size:0.9em; padding: 20px 0;">Carregando barbeiros...</p>
                 </div>
             </section>
 
             <section class="section-box">
                 <div class="section-title-bar">Serviços Oferecidos</div>
                 <div class="options-list" id="servicos-list">
-                    <div class="selectable-item" data-value="Cabelo">Cabelo</div>
-                    <div class="selectable-item" data-value="Barba">Barba</div>
-                    <div class="selectable-item" data-value="Sobrancelha">Sobrancelha</div>
+                    <p style="text-align:center; width:100%; font-size:0.9em; padding: 20px 0;">Carregando serviços...</p>
                 </div>
             </section>
         </div>
@@ -44,9 +40,11 @@
             <div class="agenda-grid">
                 <div class="agenda-box">
                     <div class="calendar-header">
-                        <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
-                        <span id="calendar-month-year">Maio 2026</span>
-                        <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+                        <button id="prev-month" style="visibility: hidden;"><i class="fas fa-chevron-left"></i></button>
+                        
+                        <span id="calendar-month-year"></span>
+                        
+                        <button id="next-month" style="visibility: hidden;"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-days">
                         <div>Dom</div>
@@ -99,12 +97,9 @@
             <div class="info-block">
                 <p><strong>Redes sociais.</strong></p>
                 <div class="social-icons">
-                    <a href="https://instagram.com" target="_blank" title="Instagram"><i
-                            class="fa-brands fa-instagram"></i></a>
-                    <a href="https://wa.me/seunumeroaqui" target="_blank" title="WhatsApp"><i
-                            class="fa-brands fa-whatsapp"></i></a>
-                    <a href="https://facebook.com" target="_blank" title="Facebook"><i
-                            class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://wa.me/seunumeroaqui" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
                 <p><strong>Localização.</strong></p>
                 <p>R. Konrad Adenauer, 442 - Tarumã, Curitiba - PR, 82820-540</p>
@@ -113,7 +108,7 @@
     </footer>
     <script src="./js/api.js"></script>
     <script src="./js/components/header.js"></script>
-    <script src="../js/agendar.js"></script>
+    <script src="./js/agendar.js"></script>
 </body>
 
 </html>

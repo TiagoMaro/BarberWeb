@@ -113,3 +113,25 @@ exports.obterPerfil = async (req, res) => {
         return res.status(500).json({ message: "Erro ao buscar perfil.", erro: error.message });
     }
 };
+
+exports.listarUsuarios = async (req, res) => {
+    try {
+        // Captura o que vier depois do ponto de interrogação na URL
+        const { cargo } = req.query; 
+        
+        let filtro = {};
+
+        // Se o frontend mandou um cargo, a gente adiciona na regra de busca
+        if (cargo) {
+            filtro.cargo = cargo;
+        }
+
+        // Busca no banco e usa .select('-senha') para NUNCA enviar a senha criptografada para o frontend
+        const usuarios = await User.find(filtro).select('-senha');
+
+        return res.status(200).json(usuarios);
+
+    } catch (error) {
+        return res.status(500).json({ message: "Erro ao buscar usuários.", erro: error.message });
+    }
+};
