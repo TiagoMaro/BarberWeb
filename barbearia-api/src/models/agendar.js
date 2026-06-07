@@ -5,7 +5,11 @@ const AgendarSchema = new mongoose.Schema({
     barbeiro: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     cliente: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     status: { type: String, enum: ['confirmado', 'concluido', 'cancelado'], default: 'confirmado' },
-    servico: { type: String, required: true }
+    servico: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'servico',
+        required: true
+    }
 });
 
 module.exports = mongoose.model('Agendar', AgendarSchema, 'agendamentos');

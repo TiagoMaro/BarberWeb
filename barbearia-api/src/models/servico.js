@@ -24,4 +24,4 @@ const ServicoSchema = new mongoose.Schema({
 });
 
 // Força o nome da coleção para 'servicos'
-module.exports = mongoose.model('Servico', ServicoSchema, 'servicos');
+module.exports = mongoose.model('servico', ServicoSchema, 'servicos');

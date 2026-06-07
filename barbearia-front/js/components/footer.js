@@ -31,7 +31,8 @@ function renderizarFooter() {
     if (footerContainer) {
         footerContainer.innerHTML = footerHTML;
     }
-
+    // O id ou tag depende de como está no seu HTML, geralmente é assim:
+    const footer = document.querySelector('footer') || document.getElementById('footer-componente');
     document.body.appendChild(footer);
 }
 

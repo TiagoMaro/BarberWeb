@@ -1,4 +1,6 @@
 const Agendamento = require('../models/agendar');
+const User = require('../models/user');
+
 
 exports.criarAgendamento = async (req, res) => {
     try {
@@ -235,5 +237,59 @@ exports.buscarHorariosOcupados = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({ message: "Erro ao buscar disponibilidade.", erro: error.message });
+    }
+};
+
+exports.obterEstatisticasDashboard = async (req, res) => {
+    try {
+        // Trava de segurança: apenas gerentes acessam as estatísticas gerais
+        if (req.userCargo !== 'gerente') {
+            return res.status(403).json({ message: "Acesso negado. Restrito ao gerente." });
+        }
+
+        // Define o início e o fim do dia de hoje em UTC
+        const inicioHoje = new Date();
+        inicioHoje.setDate(inicioHoje.getDate() + 1);
+        inicioHoje.setUTCHours(0, 0, 0, 0);
+        
+        const fimHoje = new Date();
+        fimHoje.setDate(fimHoje.getDate() + 1);
+        fimHoje.setUTCHours(23, 59, 59, 999);
+
+        // 1. Busca os agendamentos de hoje que NÃO estão cancelados
+        const agendamentosHoje = await Agendamento.find({
+            data_hora: { $gte: inicioHoje, $lte: fimHoje },
+            status: { $ne: 'cancelado' }
+        }).populate('servico'); // Popula o serviço para podermos somar o preço
+
+        const totalAgendamentos = agendamentosHoje.length;
+
+        // 2. Calcula o faturamento estimado somando o preço de cada serviço do dia
+        let faturamentoHoje = 0;
+        
+        agendamentosHoje.forEach(ag => {
+            // RASTREADOR: Vamos ver o que o Mongoose realmente trouxe
+            console.log("🔍 Inspecionando ag.servico:", ag.servico);
+
+            if (ag.servico && ag.servico.preco) {
+                // Força a conversão para número, evitando o bug de concatenação de texto
+                faturamentoHoje += Number(ag.servico.preco);
+            }
+        });
+        
+        console.log("💰 Faturamento Total Calculado:", faturamentoHoje);
+
+        // 3. Conta o total de usuários cadastrados com o cargo de cliente
+        const totalClientes = await User.countDocuments({ cargo: 'cliente' });
+
+        // Retorna os três indicadores consolidados
+        return res.status(200).json({
+            totalAgendamentos,
+            faturamentoHoje,
+            totalClientes
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: "Erro ao calcular estatísticas do painel.", erro: error.message });
     }
 };

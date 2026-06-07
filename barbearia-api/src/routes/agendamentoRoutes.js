@@ -9,9 +9,10 @@ router.post('/agendar', authMiddleware, agendamentoController.criarAgendamento);
 //Rotas GET
 router.get('/', authMiddleware, agendamentoController.listarTodos);
 router.get('/disponibilidade', agendamentoController.listarPorBarbeiroEDia);
+router.get('/dashboard/estatisticas', authMiddleware, agendamentoController.obterEstatisticasDashboard);
+router.get('/ocupados', authMiddleware, agendamentoController.buscarHorariosOcupados);
 
 //Rotas PATCH
 router.patch('/:id/cancelar', authMiddleware, agendamentoController.cancelarAgendamento)
-router.get('/ocupados', authMiddleware, agendamentoController.buscarHorariosOcupados);
 
 module.exports = router;
