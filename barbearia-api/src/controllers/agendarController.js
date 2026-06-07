@@ -208,3 +208,35 @@ exports.cancelarAgendamento = async (req, res) => {
         return res.status(500).json({ message: "Erro ao cancelar agendamento.", erro: error.message });
     }
 };
+
+exports.buscarHorariosOcupados = async (req, res) => {
+    try {
+        const { data, barbeiro } = req.query; // Espera formato YYYY-MM-DD
+        
+        if (!data || !barbeiro) {
+            return res.status(400).json({ message: "Data e Barbeiro são obrigatórios." });
+        }
+
+        // Define o início e o fim do dia para a busca no banco
+        const inicioDia = new Date(`${data}T00:00:00.000Z`);
+        const fimDia = new Date(`${data}T23:59:59.999Z`);
+
+        // Busca todos os agendamentos daquele barbeiro naquele dia
+        const agendamentos = await Agendamento.find({
+            barbeiro: barbeiro,
+            data_hora: { $gte: inicioDia, $lte: fimDia }
+        });
+
+        // Extrai apenas as horas no formato "HH:MM" para o frontend
+        const horasOcupadas = agendamentos.map(ag => {
+            const hora = String(ag.data_hora.getUTCHours()).padStart(2, '0');
+            const minuto = String(ag.data_hora.getUTCMinutes()).padStart(2, '0');
+            return `${hora}:${minuto}`;
+        });
+
+        return res.status(200).json(horasOcupadas);
+
+    } catch (error) {
+        return res.status(500).json({ message: "Erro ao buscar disponibilidade.", erro: error.message });
+    }
+};

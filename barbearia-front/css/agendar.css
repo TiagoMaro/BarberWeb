@@ -394,3 +394,12 @@ body {
         padding: 20px;
     }
 }
+
+.hour-item.ocupado {
+    background-color: #ff4c4c !important; /* Vermelho suave */
+    color: white !important;
+    border-color: #cc0000 !important;
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none; /* A mágica: impede que o usuário consiga clicar! */
+}

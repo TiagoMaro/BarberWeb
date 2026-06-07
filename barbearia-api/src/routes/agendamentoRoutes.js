@@ -12,5 +12,5 @@ router.get('/disponibilidade', agendamentoController.listarPorBarbeiroEDia);
 
 //Rotas PATCH
 router.patch('/:id/cancelar', authMiddleware, agendamentoController.cancelarAgendamento)
-
+router.get('/ocupados', authMiddleware, agendamentoController.buscarHorariosOcupados);
 module.exports = router;

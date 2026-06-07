@@ -13,6 +13,46 @@ const bookingData = {
     horario: '' 
 };
 
+async function verificarDisponibilidade() {
+    // Só faz a busca se o cliente já escolheu o barbeiro e a data
+    if (!bookingData.funcionario || !bookingData.data) return;
+
+    // Converte a data de "DD/MM/YYYY" para "YYYY-MM-DD" para a API
+    const partes = bookingData.data.split('/');
+    const dataIso = `${partes[2]}-${partes[1]}-${partes[0]}`;
+
+    try {
+        const resposta = await fetch(`${API_BASE_URL}/agendamentos/ocupados?data=${dataIso}&barbeiro=${bookingData.funcionario}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const horasOcupadas = await resposta.json(); // Retorna ex: ["14:00", "15:00"]
+
+        // Varre todos os botões de horário da tela
+        const hourItems = document.querySelectorAll('.hour-item');
+        hourItems.forEach(hour => {
+            const horaDesteBotao = hour.getAttribute('data-time');
+            
+            // 1. Limpa o estado de ocupado e as seleções anteriores
+            hour.classList.remove('ocupado', 'selected-hour');
+            
+            // 2. Se a hora deste botão estiver na lista de ocupadas, pinta de vermelho e bloqueia
+            if (horasOcupadas.includes(horaDesteBotao)) {
+                hour.classList.add('ocupado');
+            }
+        });
+
+        // Se o horário que o usuário tinha clicado antes agora está ocupado, limpa a seleção dele
+        if (horasOcupadas.includes(bookingData.horario)) {
+            bookingData.horario = '';
+            updateSummary();
+        }
+
+    } catch (erro) {
+        console.error("Erro ao verificar horários:", erro);
+    }
+}
+
 // ==========================================
 // 1. COMPONENTE DE SERVIÇOS (DINÂMICO)
 // ==========================================
@@ -67,6 +107,7 @@ async function renderizarBarbeiros() {
                 div.classList.add('selected');
                 bookingData.funcionario = barbeiro._id;
                 updateSummary();
+                verificarDisponibilidade();
             });
             container.appendChild(div);
         });
@@ -116,6 +157,7 @@ function renderizarCalendario() {
                 const mesFormatado = String(mesAtual + 1).padStart(2, '0');
                 bookingData.data = `${diaFormatado}/${mesFormatado}/${anoAtual}`;
                 updateSummary();
+                verificarDisponibilidade();
             });
         }
         container.appendChild(divDay);
