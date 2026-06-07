@@ -7,7 +7,7 @@ function renderizarHeader() {
         </div>
         <div class="logo-text">Fauget<br>Barber</div>
         <div class="user-info">
-            <span id="statusUsuario">Carregando...</span>
+            <span id="statusUsuario" class="nav-link btn-left">Carregando...</span>
             <button id="btnSair" class="nav-link btn-right" style="display: none;">Sair</button>
         </div>
     </header>
@@ -54,7 +54,7 @@ async function verificarEstadoLogin() {
 
             // MÁGICA AQUI: Exibe o nome real do banco de dados!
             if (statusUsuario) {
-                statusUsuario.textContent = `👋 Olá, ${usuario.nomeCompleto.split(' ')[0]}`;
+                statusUsuario.textContent = `${usuario.nomeCompleto}`;
             }
 
             // Mostra o botão de sair

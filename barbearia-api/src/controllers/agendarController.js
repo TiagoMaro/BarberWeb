@@ -11,8 +11,8 @@ exports.criarAgendamento = async (req, res) => {
 
         // 1. A MÁQUINA DO TEMPO: Bloqueia datas no passado
         if (dataAgendamento < agora) {
-            return res.status(400).json({ 
-                message: "Não é possível agendar em uma data ou horário que já passou." 
+            return res.status(400).json({
+                message: "Não é possível agendar em uma data ou horário que já passou."
             });
         }
 
@@ -22,15 +22,15 @@ exports.criarAgendamento = async (req, res) => {
 
         // Bloqueia domingos (dia 0)
         if (diaDaSemana === 0) {
-            return res.status(400).json({ 
-                message: "A barbearia não funciona aos domingos." 
+            return res.status(400).json({
+                message: "A barbearia não funciona aos domingos."
             });
         }
-        
+
         // Bloqueia horários fora do expediente (8h às 18h)
         if (horaAgendamento < 8 || horaAgendamento >= 18) {
-            return res.status(400).json({ 
-                message: "A barbearia só funciona das 8h às 18h." 
+            return res.status(400).json({
+                message: "A barbearia só funciona das 8h às 18h."
             });
         }
 
@@ -107,14 +107,20 @@ exports.listarTodos = async (req, res) => {
         } else if (userCargo === 'barbeiro') {
             filtro.barbeiro = userId;
         } else if (userCargo === 'gerente') {
-            filtro = {};
+            // Se o frontend mandar um ID na URL, a gente filtra por aquele barbeiro
+            if (req.query.barbeiro) {
+                filtro.barbeiro = req.query.barbeiro;
+            } else {
+                // Se não mandar nada (Todos os Barbeiros), a gente traz tudo
+                filtro = {};
+            }
         } else {
             return res.status(403).json({ message: "Acesso negado. Seu cargo não tem permissão para esta listagem." });
         }
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        
+
         // A matemática do pulo: na página 1, pula 0. Na página 2 (limite 10), pula os 10 primeiros.
         const skip = (page - 1) * limit;
 
@@ -174,35 +180,26 @@ exports.listarPorBarbeiroEDia = async (req, res) => {
 
 exports.cancelarAgendamento = async (req, res) => {
     try {
-        const agendamentoId = req.params.id; // Pega o ID da URL
-        const clienteId = req.userId;        // Pega o ID do Token (Middleware)
+        const { id } = req.params; // Pega o ID da URL
 
-        // 1. Busca o agendamento no banco
-        const agendamento = await Agendamento.findById(agendamentoId);
+        // Busca o agendamento no banco
+        const agendamento = await Agendamento.findById(id);
 
         if (!agendamento) {
             return res.status(404).json({ message: "Agendamento não encontrado." });
         }
 
-        // 2. Segurança: Verifica se o cliente que pediu o cancelamento é o dono do agendamento
-        // (O toString() é necessário porque o cliente no banco é um ObjectId)
-        if (agendamento.cliente.toString() !== clienteId) {
-            return res.status(403).json({ message: "Você não tem permissão para cancelar este agendamento." });
+        // Regra de segurança: Opcional, mas recomendado.
+        // Garante que o cliente só cancele o PRÓPRIO agendamento.
+        if (req.userCargo === 'cliente' && agendamento.cliente.toString() !== req.userId) {
+            return res.status(403).json({ message: "Você só pode cancelar os seus próprios agendamentos." });
         }
 
-        // 3. Regra de Negócio: Não pode cancelar algo que já está cancelado
-        if (agendamento.status === 'cancelado') {
-            return res.status(400).json({ message: "Este agendamento já foi cancelado." });
-        }
-
-        // 4. Muda o status e salva
+        // Muda o status e salva
         agendamento.status = 'cancelado';
         await agendamento.save();
 
-        return res.status(200).json({
-            message: "Agendamento cancelado com sucesso!",
-            dados: agendamento
-        });
+        return res.status(200).json({ message: "Agendamento cancelado com sucesso." });
 
     } catch (error) {
         return res.status(500).json({ message: "Erro ao cancelar agendamento.", erro: error.message });
@@ -212,7 +209,7 @@ exports.cancelarAgendamento = async (req, res) => {
 exports.buscarHorariosOcupados = async (req, res) => {
     try {
         const { data, barbeiro } = req.query; // Espera formato YYYY-MM-DD
-        
+
         if (!data || !barbeiro) {
             return res.status(400).json({ message: "Data e Barbeiro são obrigatórios." });
         }

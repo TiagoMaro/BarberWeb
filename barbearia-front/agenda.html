@@ -17,9 +17,17 @@
     <header id="header-componente"></header>
 
     <main class="agenda-container">
-        <div class="section-title-bar">Meus Agendamentos</div>
+        <div class="section-title-bar">Painel de Agendamentos</div>
+
+        <div id="filtroGerente" style="display: none; margin: 15px auto; text-align: center;">
+            <label for="selectBarbeirosGerente" style="font-weight: 600;">Visualizar agenda do profissional:</label>
+            <select id="selectBarbeirosGerente" style="padding: 8px; border-radius: 4px; margin-left: 10px;">
+                <option value="">Todos os Barbeiros</option>
+            </select>
+        </div>
 
         <div class="appointments-list" id="appointments-list">
+            <p style="text-align: center; padding: 20px;">Carregando compromissos...</p>
         </div>
     </main>
 
