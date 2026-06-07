@@ -7,7 +7,7 @@ function renderizarHeader() {
         </div>
         <div class="logo-text">Fauget<br>Barber</div>
         <div class="user-info">
-            <span id="statusUsuario" class="nav-link btn-left">Carregando...</span>
+            <span id="statusUsuario"  >Carregando...</span>
             <button id="btnSair" class="nav-link btn-right" style="display: none;">Sair</button>
         </div>
     </header>
@@ -54,9 +54,15 @@ async function verificarEstadoLogin() {
 
             // MÁGICA AQUI: Exibe o nome real do banco de dados!
             if (statusUsuario) {
+                statusUsuario.className = "nav-link btn-left";
+                statusUsuario.addEventListener('click', () => {
+                    window.location.href = 'perfil.html';
+                });
                 statusUsuario.textContent = `${usuario.nomeCompleto}`;
             }
 
+
+            
             // Mostra o botão de sair
             if (btnSair) {
                 btnSair.style.display = 'inline-block';

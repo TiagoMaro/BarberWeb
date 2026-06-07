@@ -61,38 +61,28 @@ exports.login = async (req, res) => {
 // Atualizar o próprio perfil
 exports.atualizarPerfil = async (req, res) => {
     try {
-        const userId = req.userId; // Esse ID vem do nosso authMiddleware!
-        const { nomeCompleto, email } = req.body;
-
-        // Busca o usuário no banco
-        const user = await User.findById(userId);
-
-        if (!user) {
+        const { nomeCompleto, email, senhaHash } = req.body;
+        
+        // 1. Busca o usuário pelo ID que está no token
+        const usuario = await User.findById(req.userId);
+        
+        if (!usuario) {
             return res.status(404).json({ message: "Usuário não encontrado." });
         }
 
-        // Atualiza apenas os campos que o frontend enviou
-        if (nomeCompleto) user.nomeCompleto = nomeCompleto;
-        if (email) user.email = email;
-
-        if (req.body.senhaHash) {
-            // Criptografa a nova senha antes de salvar no banco
-            const salt = await bcrypt.genSalt(10);
-            user.senhaHash = await bcrypt.hash(req.body.senhaHash, salt);
-        }
+        // 2. Atualiza apenas os campos que o frontend enviou
+        if (nomeCompleto) usuario.nomeCompleto = nomeCompleto;
+        if (email) usuario.email = email;
         
-        // Salva as alterações no MongoDB
-        await user.save();
+        // 3. A MÁGICA DA SENHA: 
+        if (senhaHash) {
+            usuario.senhaHash = senhaHash; // O "pre" do Mongoose vai cuidar de criptografar isso antes de salvar
+        }
 
-        return res.status(200).json({
-            message: "Perfil atualizado com sucesso!",
-            dados: {
-                id: user._id,
-                nomeCompleto: user.nomeCompleto,
-                email: user.email,
-                cargo: user.cargo
-            }
-        });
+        // 4. Salva no banco de dados
+        await usuario.save();
+
+        return res.status(200).json({ message: "Perfil atualizado com sucesso!" });
 
     } catch (error) {
         return res.status(500).json({ message: "Erro ao atualizar perfil.", erro: error.message });
@@ -133,5 +123,39 @@ exports.listarUsuarios = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({ message: "Erro ao buscar usuários.", erro: error.message });
+    }
+};
+
+exports.alterarCargo = async (req, res) => {
+    try {
+        const { id } = req.params; // ID do usuário que vai ser promovido
+        const { novoCargo } = req.body; // 'cliente', 'barbeiro' ou 'gerente'
+
+        // 1. Trava de Segurança Máxima: Só gerente faz isso!
+        if (req.userCargo !== 'gerente') {
+            return res.status(403).json({ message: "Acesso negado. Apenas gerentes podem alterar cargos." });
+        }
+
+        // 2. Validação simples
+        const cargosPermitidos = ['cliente', 'barbeiro', 'gerente'];
+        if (!cargosPermitidos.includes(novoCargo)) {
+            return res.status(400).json({ message: "Cargo inválido." });
+        }
+
+        // 3. Busca o usuário e atualiza
+        const usuario = await User.findById(id);
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuário não encontrado." });
+        }
+
+        usuario.cargo = novoCargo;
+        await usuario.save();
+
+        return res.status(200).json({ 
+            message: `Sucesso! O usuário ${usuario.nomeCompleto} agora é um ${novoCargo}.` 
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: "Erro ao atualizar cargo.", erro: error.message });
     }
 };

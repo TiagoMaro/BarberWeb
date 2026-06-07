@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Fauget Barber</title>
+    <link rel="stylesheet" href="./css/agendar.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Cinzel:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="./css/painel.css">
+</head>
+
+<body>
+
+    <header id="header-componente"></header>
+
+    <main class="booking-container" style="max-width: 1000px; margin: 40px auto; padding: 20px;">
+        <div class="section-title-bar">Painel de Controle Gerencial</div>
+
+        <p style="text-align: center; margin-bottom: 30px;">Gerencie a equipe e promova usuários a barbeiros ou
+            gerentes.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nome Completo</th>
+                        <th>E-mail</th>
+                        <th>Cargo Atual</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaUsuarios">
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Carregando usuários...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 40px 0;">
+
+        <div class="section-title-bar">Gestão de Serviços</div>
+        <p style="text-align: center; margin-bottom: 20px;">Cadastre novos serviços ou remova opções desativadas.</p>
+
+        <div
+            style="background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 30px;">
+            <h4 style="margin-top: 0;">Cadastrar Novo Serviço</h4>
+            <form id="formNovoServico" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+                <div style="flex: 2; min-width: 200px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Nome do Serviço</label>
+                    <input type="text" id="nomeServico" required placeholder="Ex: Corte Degradê"
+                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="flex: 1; min-width: 100px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Preço (R$)</label>
+                    <input type="number" id="precoServico" required min="0" step="0.01" placeholder="35.00"
+                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="flex: 1; min-width: 150px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Duração (min)</label>
+                    <input type="number" id="duracaoServico" required min="10" step="5" placeholder="30"
+                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <button type="submit"
+                    style="background-color: #433831; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; height: 40px;">
+                    Adicionar
+                </button>
+            </form>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Serviço</th>
+                        <th>Preço</th>
+                        <th>Duração</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaServicos">
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Carregando serviços...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <footer class="footer" id="footer-componente"></footer>
+
+    <script src="./js/components/footer.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/components/header.js"></script>
+    <script src="./js/painel.js"></script>
+</body>
+
+</html>
