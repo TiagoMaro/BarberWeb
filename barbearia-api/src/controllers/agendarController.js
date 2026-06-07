@@ -69,7 +69,7 @@ exports.criarAgendamento = async (req, res) => {
         //Retorna erro específico se o cliente já tiver marcado com outra pessoa na mesma hora
         if (conflitoCliente) {
             return res.status(400).json({
-                message: "Conflito: Você (cliente) já possui um agendamento marcado neste mesmo horário."
+                message: "Conflito: Você já possui um agendamento marcado neste mesmo horário."
             });
         }
 
